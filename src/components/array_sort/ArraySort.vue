@@ -27,11 +27,13 @@
 import { getArray } from './array.js'
 import { bubbleSort, quickSort, mergeSort, insertSort } from './array_sort_func.js'
 import ArrayCanvas from './array_canvas.js'
+import Vue from 'vue'
 
 export default {
   mounted () {
     this.arrayCanvas = new ArrayCanvas('array-canvas')
     this.array = getArray(this.arrayLen, this.onArrayChange)
+    this.array.random()
     this.allArray = []
     this.arrayCanvas._draw(this.array.getRaw())
   },
@@ -41,6 +43,7 @@ export default {
       isRunning: false,
       isDraw: false,
       codeName: 0,
+      lastCodeName: 0,
       rate: 0,
       arrayLen: 500,
       editorOption: {
@@ -57,12 +60,15 @@ export default {
   },
   computed: {
     code: function () {
-      const lenDict = [500, 100, 500, 100]
-      this.arrayLen = lenDict[this.codeName]
-      if (this.arrayCanvas) {
-        this.array = getArray(this.arrayLen, this.onArrayChange)
-        this.arrayCanvas._draw(this.array.getRaw())
+      if (this.lastCodeName !== this.codeName) {
+        const lenDict = [500, 100, 500, 100]
+        this.arrayLen = lenDict[this.codeName]
+        if (this.arrayCanvas) {
+          this.array = getArray(this.arrayLen, this.onArrayChange)
+          this.arrayCanvas._draw(this.array.getRaw())
+        }
       }
+      this.lastCodeName = this.codeName
       return this.codes[this.codeName]
     }
   },
@@ -98,7 +104,9 @@ export default {
       this.arrayCanvas.setRate(rate)
     },
     codeChange (newCode) {
-      this.code = newCode
+      console.log(newCode, '--')
+      Vue.set(this.codes, this.codeName, newCode)
+      console.log(this.code)
     },
     runCode () {
       if (this.isRunning) {
@@ -107,23 +115,23 @@ export default {
       this.arrayCanvas.cleanTimes()
       this.allArray = []
       this.isRunning = true
-      try {
-        const evalCode = `
-        (function () {
-          return function (array) {
-            return function () {
-              ${this.code}
-            }
+      const evalCode = `
+      (function () {
+        return function (array) {
+          return function () {
+            ${this.code}
           }
-        })()
-        `
-        setTimeout(() => {
+        }
+      })()
+      `
+      setTimeout(() => {
+        try {
           window.eval(evalCode)(this.array)()
-          this.isRunning = false
-        }, 0)
-      } catch (e) {
-        window.alert(e)
-      }
+        } catch (e) {
+          window.alert(e)
+        }
+        this.isRunning = false
+      }, 0)
     }
   }
 }
