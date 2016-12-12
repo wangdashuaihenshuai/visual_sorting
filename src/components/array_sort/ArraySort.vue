@@ -13,6 +13,7 @@
           <el-radio :label="1">冒泡排序</el-radio>
           <el-radio :label="2">归并排序</el-radio>
           <el-radio :label="3">插入排序</el-radio>
+          <el-radio :label="4">堆排序</el-radio>
         </el-radio-group>
       </div>
       <codemirror :code="code" :options="editorOption" @changed="codeChange"></codemirror>
@@ -25,7 +26,7 @@
 
 <script>
 import { getArray } from './array.js'
-import { bubbleSort, quickSort, mergeSort, insertSort } from './array_sort_func.js'
+import { bubbleSort, quickSort, mergeSort, insertSort, headSort } from './array_sort_func.js'
 import ArrayCanvas from './array_canvas.js'
 import Vue from 'vue'
 
@@ -39,7 +40,7 @@ export default {
   },
   data () {
     return {
-      codes: [quickSort, bubbleSort, mergeSort, insertSort],
+      codes: [quickSort, bubbleSort, mergeSort, insertSort, headSort],
       isRunning: false,
       isDraw: false,
       codeName: 0,
@@ -61,7 +62,7 @@ export default {
   computed: {
     code: function () {
       if (this.lastCodeName !== this.codeName) {
-        const lenDict = [500, 100, 500, 100]
+        const lenDict = [500, 100, 500, 100, 200]
         this.arrayLen = lenDict[this.codeName]
         if (this.arrayCanvas) {
           this.array = getArray(this.arrayLen, this.onArrayChange)
